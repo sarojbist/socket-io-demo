@@ -15,6 +15,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { useSocketStore } from "@/store/useSocketStore";
+import { useNavigate } from 'react-router-dom';
 
 // ------------------
 // Zod Schema
@@ -29,6 +31,7 @@ type RegisterFormType = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [showPassword] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<RegisterFormType>({
     resolver: zodResolver(registerSchema),
@@ -46,6 +49,9 @@ export default function Register() {
     mutationFn: registerService,
   });
 
+  const connectSocket = useSocketStore((s) => s.connectSocket);
+
+
   const onSubmit = async (values: RegisterFormType) => {
     try {
       const res = await mutateAsync(values);
@@ -56,11 +62,17 @@ export default function Register() {
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      connectSocket(res.token, res.user.userId);
+      navigate('/profile');
+
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Registration failed");
     }
   };
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -104,7 +116,7 @@ export default function Register() {
             {/* Password */}
             <FormField
               control={form.control}
-              name="password"             
+              name="password"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
