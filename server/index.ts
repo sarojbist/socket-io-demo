@@ -1,21 +1,17 @@
-import express, { Request, Response } from "express";
-import {createServer} from "http";
-import {Server} from "socket.io";
+import { connectDatabase } from "./src/Models/db";
+import dotenv from "dotenv";
+import { httpServer } from "@/app";
+dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {})
-
-io.on("connection", (socket) => {
-  // ...
-});
-
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hi");
-});
-
-httpServer.listen(PORT, () => {
-    console.log("App is Running on port", PORT);
-});
+connectDatabase()
+  .then(() => {
+    console.log("Connected to Database Successfully");
+    httpServer.listen(PORT, () => {
+      console.log("App is Running on port", PORT);
+    });
+  })
+  .catch((err) => {
+    console.log("Error connecting to Database due to", err);
+  });
