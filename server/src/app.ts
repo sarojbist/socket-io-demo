@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("make-user-active", ({ userId, token }) => {
-    console.log("User just got active ", userId)
+    console.log("User just got active ",userId, socket.id)
     UserController.makeUserActive({ userId, token }, socket)
   })
 

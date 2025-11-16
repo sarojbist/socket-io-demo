@@ -127,8 +127,10 @@ class UserController {
 
   // Get current user
   getMe = async (req, res) => {
+
+    const userId = req.body.id;
     try {
-      const user = await UserModel.findById(req.user.id).select('-password');
+      const user = await UserModel.findById(userId).select('-password');
 
       if (!user) {
         return res.status(404).json({
