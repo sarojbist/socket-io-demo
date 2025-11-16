@@ -1,9 +1,14 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { userRouter } from "./Routes/UserRouter";
+import cors from "cors";
 
 export const app = express();
+app.use(cors())
+app.use(express.json());
+
+
 export const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {

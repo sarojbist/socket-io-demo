@@ -1,14 +1,24 @@
+import { Routes, Route } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { io } from "socket.io-client";
+import Register from "./auth/register";
 
 function App() {
-  const socket = io("http://localhost:8080");
-  socket.emit("welcome", "hey boy how are you?")
+  return (
+    <div className="min-h-svh">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </div>
+  );
+}
+
+function Home() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center">
       <Button>Click me</Button>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

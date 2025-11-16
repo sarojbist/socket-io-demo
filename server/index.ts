@@ -1,7 +1,8 @@
-import { connectDatabase } from "./src/Models/db";
 import dotenv from "dotenv";
-import { httpServer } from "@/app";
 dotenv.config();
+import { connectDatabase } from "./src/Models/db";
+import { httpServer } from "@/app";
+
 
 const PORT = process.env.PORT || 8080;
 
