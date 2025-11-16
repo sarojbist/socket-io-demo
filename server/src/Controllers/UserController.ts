@@ -177,6 +177,29 @@ class UserController {
     }
   };
 
+  // Get all users sorted by online first, then offline
+  getAllUsersSorted = async (req, res) => {
+    try {
+      const users = await UserModel
+        .find({})
+        .select("-password")
+        .sort({ isOnline: -1, username: 1 });
+      // online first, then alphabetical
+
+      return res.status(200).json({
+        success: true,
+        users,
+      });
+    } catch (error) {
+      console.error("Get all users sorted error:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
   // spocket route for making user active
   makeUserActive = async ({ userId, token }, socket) => {
 
@@ -195,7 +218,7 @@ class UserController {
       userCheck.isOnline = true;
       await userCheck.save();
 
-       socket.emit("make-user-active-success", {
+      socket.emit("make-user-active-success", {
         success: true,
         message: "User is active",
       });
@@ -203,7 +226,7 @@ class UserController {
 
     } catch (error) {
       console.error('Make user active error:', error);
-       socket.emit("make-user-active-error", {
+      socket.emit("make-user-active-error", {
         success: false,
         message: error.message,
       });

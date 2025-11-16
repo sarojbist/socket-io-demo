@@ -11,6 +11,9 @@ app.use(express.json());
 
 
 export const httpServer = createServer(app);
+
+const onlineUsers = new Map(); // userId => socketId
+
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT,
@@ -25,7 +28,12 @@ io.on("connection", (socket) => {
   })
 
   socket.on("make-user-active", ({ userId, token }) => {
-    console.log("User just got active ",userId, socket.id)
+    console.log("User just got active ", userId, socket.id)
+    onlineUsers.set(userId, socket.id);
+    const allOnlineUserIds = [...onlineUsers.values()];
+        const Keys = [...onlineUsers.keys()];
+console.log("keys", Keys);
+    console.log("active sockets/users", allOnlineUserIds)
     UserController.makeUserActive({ userId, token }, socket)
   })
 

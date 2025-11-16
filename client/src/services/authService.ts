@@ -12,6 +12,11 @@ export const registerService = async (data: {
   return res.data;
 };
 
+export const loginService = async (payload: { email: string; password: string }) => {
+  const res = await axios.post(`${API_URL}users/login`, payload);
+  return res.data; // { success, token, user }
+};
+
 export const getMyDetails = async (): Promise<TGetMyDetailsResponse | null> => {
   const rawUser = localStorage.getItem("user");
   if (!rawUser) {

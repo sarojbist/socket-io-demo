@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import Profile from "./pages/profile";
 import ProtectedRoute from "./auth/protectedRoute";
+import Login from "./auth/login";
 
 const socket = io("http://localhost:8080");
 
@@ -13,6 +14,7 @@ function App() {
     <div className="min-h-svh">
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
