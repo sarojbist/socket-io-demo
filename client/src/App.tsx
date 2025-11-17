@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import Profile from "./pages/profile";
 import ProtectedRoute from "./auth/protectedRoute";
 import Login from "./auth/login";
+import Playground from "./pages/playGround";
 
 const socket = io("http://localhost:8080");
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/playground" element={<Playground />} />
         </Route>
       </Routes>
     </div>
