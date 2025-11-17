@@ -1,28 +1,28 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createConversation, getMessages } from "@/services/userService";
 import { useSocketStore } from "@/store/useSocketStore";
-
+import { ArrowLeft, Send } from "lucide-react";
 interface ChatWindowProps {
     user: {
         _id: string;
         username: string;
         isOnline: boolean;
     } | null;
+    onBack: () => void;
 }
 
-export default function ChatWindow({ user }: ChatWindowProps) {
-    // 1. Get my own info from localStorage
+export function ChatWindow({ user, onBack }: ChatWindowProps) {
     const raw = localStorage.getItem("user");
     const me = raw ? JSON.parse(raw) : null;
 
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [input, setInput] = useState("");
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-    // 2. Create/Get conversation on user click
     useEffect(() => {
         if (!me || !user) return;
 
@@ -38,7 +38,6 @@ export default function ChatWindow({ user }: ChatWindowProps) {
         fetchConversation();
     }, [user]);
 
-    // 3. Fetch messages for this conversation
     const { data, isLoading } = useQuery({
         queryKey: ["messages", conversationId],
         queryFn: () => getMessages({ conversationId: conversationId! }),
@@ -48,28 +47,8 @@ export default function ChatWindow({ user }: ChatWindowProps) {
     const sendMessage = useSocketStore(s => s.sendMessage);
     const realtimeMessages = useSocketStore((s) => s.messages);
 
-    function handleMessageSend() {
-        if (conversationId) {
-            sendMessage({
-                conversationId,
-                senderId: me.id,
-                content: input,
-            });
-            setInput("")
-        }
-    }
-
-    if (!user) {
-        return (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                Select a user to start chatting.
-            </div>
-        );
-    }
-
     const messagesApi = data?.messages || [];
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const messages = [
         ...messagesApi,
         ...realtimeMessages.filter(
@@ -77,22 +56,65 @@ export default function ChatWindow({ user }: ChatWindowProps) {
         ),
     ];
 
+    // Auto scroll to bottom
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    function handleMessageSend() {
+        if (conversationId && input.trim()) {
+            sendMessage({
+                conversationId,
+                senderId: me.id,
+                content: input,
+            });
+            setInput("");
+        }
+    }
+
+    function handleKeyPress(e: React.KeyboardEvent) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleMessageSend();
+        }
+    }
+
+    if (!user) {
+        return (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground px-4 text-center">
+                <p>Select a contact to start chatting</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col h-full w-full">
             {/* Header */}
-            <div className="border-b p-4 flex items-center gap-3">
-                <div className="relative h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+            <div className="border-b p-3 sm:p-4 flex items-center gap-3 bg-card shrink-0">
+                {onBack && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onBack}
+                        className="md:hidden"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                )}
+                
+                <div className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm sm:text-base shrink-0">
                     {user.username[0].toUpperCase()}
-
                     <span
-                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${user.isOnline ? "bg-green-500" : "bg-gray-400"
-                            }`}
+                        className={`absolute bottom-0 right-0 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full border-2 border-card ${
+                            user.isOnline ? "bg-green-500" : "bg-gray-400"
+                        }`}
                     />
                 </div>
 
-                <div>
-                    <p className="font-medium">{user.username}</p>
+                <div className="min-w-0">
+                    <p className="font-medium truncate text-sm sm:text-base">{user.username}</p>
                     <p className="text-xs text-muted-foreground">
                         {user.isOnline ? "Online" : "Offline"}
                     </p>
@@ -100,34 +122,58 @@ export default function ChatWindow({ user }: ChatWindowProps) {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="p-2 space-y-1 max-h-[calc(100vh-200px)]">
-                {isLoading ? (
-                    <p>Loading messages...</p>
-                ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg._id}
-                            className={`max-w-[70%] px-4 py-2 rounded-lg shadow text-sm ${msg.senderId === me.id
-                                ? "ml-auto bg-primary text-white"
-                                : "mr-auto bg-muted"
-                                }`}
-                        >
-                            {msg.content}
-                            <p className="text-[10px] opacity-70 mt-1">
-                                {new Date(msg.createdAt).toLocaleTimeString()}
-                            </p>
-                        </div>
-                    ))
-                )}
-            </ScrollArea>
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4" ref={scrollRef}>
+                <div className="space-y-3">
+                    {isLoading ? (
+                        <p className="text-center text-muted-foreground text-sm">Loading messages...</p>
+                    ) : messages.length === 0 ? (
+                        <p className="text-center text-muted-foreground text-sm mt-8">No messages yet. Start the conversation!</p>
+                    ) : (
+                        messages.map((msg) => (
+                            <div
+                                key={msg._id}
+                                className={`flex ${msg.senderId === me.id ? "justify-end" : "justify-start"}`}
+                            >
+                                <div
+                                    className={`max-w-[85%] sm:max-w-[70%] px-3 sm:px-4 py-2 rounded-2xl shadow-sm ${
+                                        msg.senderId === me.id
+                                            ? "bg-primary text-primary-foreground rounded-br-sm"
+                                            : "bg-muted text-foreground rounded-bl-sm"
+                                    }`}
+                                >
+                                    <p className="text-sm break-words">{msg.content}</p>
+                                    <p className="text-[10px] opacity-70 mt-1">
+                                        {new Date(msg.createdAt).toLocaleTimeString([], { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit' 
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
             {/* Input */}
-            <div className="p-4 border-t flex gap-2">
-                <Input
-                    placeholder="Type a message..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                />
-                <Button onClick={handleMessageSend}>Send</Button>
+            <div className="p-3 sm:p-4 border-t bg-card shrink-0">
+                <div className="flex gap-2">
+                    <Input
+                        placeholder="Type a message..."
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        className="flex-1"
+                    />
+                    <Button 
+                        onClick={handleMessageSend}
+                        size="icon"
+                        disabled={!input.trim()}
+                        className="shrink-0"
+                    >
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         </div>
     );
