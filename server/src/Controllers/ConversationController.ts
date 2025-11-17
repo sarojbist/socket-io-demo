@@ -58,7 +58,7 @@ class ConversationController {
         try {
             const { conversationId } = req.params;
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 20;
+            const limit = parseInt(req.query.limit) || 50;
 
             if (!conversationId) {
                 return res.status(400).json({

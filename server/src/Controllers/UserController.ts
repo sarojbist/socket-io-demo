@@ -207,7 +207,6 @@ class UserController {
       const userCheck = await UserModel.findById(userId);
 
       if (!userCheck) {
-        // SEND ERROR BACK TO CLIENT 
         socket.emit("make-user-active-error", {
           success: false,
           message: "User not found",

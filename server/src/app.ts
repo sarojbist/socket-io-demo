@@ -17,7 +17,6 @@ export const httpServer = createServer(app);
 const onlineUsers = new Map(); // userId => socketId
 const socketToUser = new Map(); // socketId -> userId
 
-
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT,
@@ -32,19 +31,19 @@ io.on("connection", (socket) => {
   })
 
   socket.on("make-user-active", ({ userId, token }) => {
-    console.log("User just got active ", userId, socket.id)
+    console.log("User just got active ", userId, socket.id);
     onlineUsers.set(userId, socket.id);
     socketToUser.set(socket.id, userId);
     const allOnlineUserIds = [...onlineUsers.values()];
-    const Keys = [...onlineUsers.keys()];
-    console.log("keys", Keys);
-    console.log("active sockets/users", allOnlineUserIds)
-    UserController.makeUserActive({ userId, token }, socket)
-  })
+    // const Keys = [...onlineUsers.keys()];
+    // console.log("keys", Keys);
+    console.log("active sockets/users", allOnlineUserIds);
+    UserController.makeUserActive({ userId, token }, socket);
+  });
 
   // handle messages
   socket.on("send-message", ({ conversationId, senderId, content, type = "text" }) => {
-    const payload = { conversationId, senderId, content, type: "text" }
+    const payload = { conversationId, senderId, content, type }
     ConversationController.handleMessage(
       payload,
       socket,

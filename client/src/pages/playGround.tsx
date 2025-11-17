@@ -27,16 +27,17 @@ export default function Playground() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* LEFT SIDEBAR - Mobile: full screen, Desktop: fixed width */}
+      {/* SIDEBAR */}
       <aside
-        className={`${isMobileSidebarOpen ? "flex" : "hidden"
-          } md:flex w-full md:w-80 lg:w-96 border-r bg-card flex-col`}
+        className={`${
+          isMobileSidebarOpen ? "flex" : "hidden"
+        } md:flex w-full md:w-80 lg:w-96 border-r bg-card flex-col`}
       >
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold">Contacts</h2>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 h-[80vh]">
           <div className="p-2">
             {isLoading ? (
               <SidebarSkeleton />
@@ -58,14 +59,16 @@ export default function Playground() {
 
       {/* RIGHT CHAT WINDOW */}
       <div
-        className={`${isMobileSidebarOpen ? "hidden" : "flex"
-          } md:flex flex-1`}
+        className={`${
+          isMobileSidebarOpen ? "hidden" : "flex"
+        } md:flex flex-1`}
       >
         <ChatWindow user={selectedUser} onBack={handleBack} />
       </div>
     </div>
   );
 }
+
 
 function UserListItem({
   user,
@@ -77,27 +80,32 @@ function UserListItem({
   isSelected?: boolean;
 }) {
   const userInfo = localStorage.getItem("user")
-        ? JSON.parse(localStorage.getItem("user")!)
-        : null; 
-        
-        return (
+    ? JSON.parse(localStorage.getItem("user")!)
+    : null;
+
+  return (
     <div
       onClick={onSelect}
-      className={`flex items-center gap-3 p-3 rounded-lg hover:bg-accent cursor-pointer transition-colors ${isSelected ? "bg-accent" : ""
-        }`}
+      className={`flex items-center gap-3 p-3 rounded-lg hover:bg-accent cursor-pointer transition-colors ${
+        isSelected ? "bg-accent" : ""
+      }`}
     >
       <div className="relative shrink-0">
         <div className="h-11 w-11 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
           {user.username[0].toUpperCase()}
         </div>
+
         <span
-          className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card ${user.isOnline ? "bg-green-500" : "bg-gray-400"
-            }`}
+          className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card ${
+            user.isOnline ? "bg-green-500" : "bg-gray-400"
+          }`}
         />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="font-medium truncate">{user.username} {(userInfo.id === user._id ? "(You)": "")}</p>
+        <p className="font-medium truncate">
+          {user.username} {userInfo?.id === user._id ? "(You)" : ""}
+        </p>
         <p className="text-xs text-muted-foreground">
           {user.isOnline ? "Online" : "Offline"}
         </p>

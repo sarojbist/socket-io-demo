@@ -40,7 +40,7 @@ export const createConversation = async ({
 export const getMessages = async (
     { conversationId,
         page = 1,
-        limit = 20 }:
+        limit = 50 }:
         {
             conversationId: string;
             page?: number;
