@@ -12,7 +12,7 @@ export type TGetMyDetailsResponse = {
 };
 
 export type TUserPlayground = {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   isOnline: boolean;
@@ -23,3 +23,37 @@ export type IGetAllUsersResponse = {
   success: boolean;
   users: TUserPlayground[];
 }
+
+
+// chats
+// Conversation model from backend
+export interface TConversation {
+  _id: string;
+  participants: string[];
+  lastMessageAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Message model
+export interface TMessage {
+  _id: string;
+  conversationId: string;
+  senderId: string;
+  type: "text" | "image" | "file";
+  content: string;
+  createdAt: string;
+}
+
+export interface CreateConversationResponse {
+  success: boolean;
+  conversation: TConversation;
+}
+
+export interface GetMessagesResponse {
+  success: boolean;
+  page: number;
+  limit: number;
+  messages: TMessage[];
+}
+

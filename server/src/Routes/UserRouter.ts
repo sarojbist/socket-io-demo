@@ -1,3 +1,4 @@
+import ConversationController from "@/Controllers/ConversationController";
 import UserController from "@/Controllers/UserController";
 import { verifyJwt } from "@/Utils/jwtAuth";
 import express from "express";
@@ -11,5 +12,6 @@ userRouter.post("/get-my-details", UserController.getMe);
 
 userRouter.post("/get-all-contacts", verifyJwt, UserController.getAllUsersSorted);
 
-
+userRouter.post("/create-conversation", verifyJwt, ConversationController.getOrCreateConversation);
+userRouter.get("/get-messages/:conversationId", verifyJwt, ConversationController.getMessages);
 

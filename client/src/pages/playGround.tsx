@@ -25,7 +25,7 @@ export default function Playground() {
           <div className="space-y-2">
             {users?.map((u) => (
               <UserListItem
-                key={u.id}
+                key={u._id}
                 user={u}
                 onSelect={() => setSelectedUser(u)} 
               />
