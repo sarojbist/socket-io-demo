@@ -18,6 +18,8 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ user, onBack }: ChatWindowProps) {
+    const [uploading, setUploading] = useState(false);
+
     const raw = localStorage.getItem("user");
     const me = raw ? JSON.parse(raw) : null;
 
@@ -87,6 +89,8 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
         const file = e.target.files?.[0];
         if (!file || !conversationId) return;
 
+        setUploading(true);
+
         try {
             await sendFileMessage({
                 file,
@@ -97,9 +101,12 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
             e.target.value = "";
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-            toast.error(`File upload failed due to ${err.msg}`);
+            toast.error(`File upload failed: ${err.msg}`);
+        } finally {
+            setUploading(false);
         }
     }
+
     function isImageUrl(url: string) {
         return /\.(png|jpg|jpeg|gif|webp)$/i.test(url);
     }
@@ -166,7 +173,6 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
                                         }`}
                                 >
 
-                                    {/* 🔥 MESSAGE TYPE HANDLER */}
                                     {msg.content.startsWith("http") ? (
                                         isImageUrl(msg.content) ? (
                                             <img
@@ -201,12 +207,8 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
                 </div>
             </div>
 
-
-            {/* Input */}
-            {/* Input Bar */}
             <div className="p-3 border-t flex items-center gap-2">
 
-                {/* Hidden file input */}
                 <input
                     id="file-input"
                     type="file"
@@ -214,24 +216,32 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
                     onChange={handleFileUpload}
                 />
 
-                {/* File icon */}
-                <label htmlFor="file-input" className="cursor-pointer text-xl">
-                    📎
+                <label htmlFor="file-input" className="cursor-pointer text-xl relative">
+                    {uploading ? (
+                        <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        "📎"
+                    )}
                 </label>
 
-                {/* Text input */}
+
                 <Input
                     placeholder="Type a message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     className="flex-1"
+                    disabled={uploading}
                 />
 
-                {/* Send button */}
-                <Button onClick={handleMessageSend} size="icon" disabled={!input.trim()}>
+                <Button
+                    onClick={handleMessageSend}
+                    size="icon"
+                    disabled={!input.trim() || uploading}
+                >
                     <Send className="h-4 w-4" />
                 </Button>
+
             </div>
 
 
