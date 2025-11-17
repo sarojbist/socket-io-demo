@@ -1,6 +1,7 @@
 import { ConversationModel } from "@/Models/ConversationModel";
 import { MessageModel } from "@/Models/messageModel";
 import { UserModel } from "@/Models/UserModel";
+import { uploadOnCloudinary } from "@/Utils/cloudinaryUpload";
 import { Request, Response } from "express";
 
 class ConversationController {
@@ -100,6 +101,89 @@ class ConversationController {
             });
         }
     };
+
+    //conversation handler sockets
+    handleFileMessage = async (req, res) => {
+        const socket = req.socket;
+        const io = req.io;
+        const onlineUsers = req.onlineUsers;
+
+        try {
+            const { conversationId, senderId } = req.body;
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "File is required"
+                });
+            }
+
+            const conversation = await ConversationModel.findById(conversationId);
+            if (!conversation) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Conversation not found"
+                });
+            }
+
+            // 3. Upload to Cloudinary
+            const fileUrl = await uploadOnCloudinary(req.file.path);
+
+            if (!fileUrl) {
+                return res.status(500).json({
+                    success: false,
+                    message: "File upload to Cloudinary failed"
+                });
+            }
+
+            const messagePayload = {
+                conversationId,
+                senderId,
+                type: "file",
+                content: fileUrl,
+            };
+
+            const message = await MessageModel.create(messagePayload);
+
+            conversation.lastMessageAt = new Date();
+            await conversation.save();
+
+            if (socket) {
+                socket.emit("new-message", message);
+            } else {
+                console.log("Sender offline — skipping sender emit");
+            }
+
+            const receiverId = conversation.participants.find(
+                (id) => id.toString() !== senderId
+            );
+
+            if (receiverId) {
+                const receiverSocketId = onlineUsers.get(receiverId.toString());
+
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("new-message", message);
+                    console.log("Delivered file to receiver:", receiverSocketId);
+                } else {
+                    console.log("Receiver offline, saving only to DB.");
+                }
+            }
+
+            return res.status(201).json({
+                success: true,
+                message: "File sent successfully",
+                data: message
+            });
+
+        } catch (error) {
+            console.error("File message error:", error);
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    };
+
 
     //conversation handler sockets
     handleMessage = async ({ conversationId, senderId, content, type = "text" }, socket, io, onlineUsers) => {

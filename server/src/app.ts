@@ -6,6 +6,8 @@ import cors from "cors";
 import UserController from "./Controllers/UserController";
 import { UserModel } from "./Models/UserModel";
 import ConversationController from "./Controllers/ConversationController";
+import { verifyJwt } from "./Utils/jwtAuth";
+import { upload } from "./Middlewares/multer";
 
 export const app = express();
 app.use(cors())
@@ -70,5 +72,22 @@ io.on("connection", (socket) => {
 
 });
 
-app.use("/api/v1/users", userRouter)
+app.use("/api/v1/users", userRouter);
+app.post(
+  "/api/v1/users/send-file",
+  verifyJwt,
+  upload.single("file"),  
+  (req: any, res, next) => {
+    const userId = req.user.id.toString();
+    const socketId = onlineUsers.get(userId);
+
+    req.io = io;
+    req.onlineUsers = onlineUsers;
+    req.socket = socketId ? io.sockets.sockets.get(socketId) : null;
+
+    next();
+  },
+  ConversationController.handleFileMessage
+);
+
 

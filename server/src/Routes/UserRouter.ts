@@ -15,3 +15,5 @@ userRouter.post("/get-all-contacts", verifyJwt, UserController.getAllUsersSorted
 userRouter.post("/create-conversation", verifyJwt, ConversationController.getOrCreateConversation);
 userRouter.get("/get-messages/:conversationId", verifyJwt, ConversationController.getMessages);
 
+
+

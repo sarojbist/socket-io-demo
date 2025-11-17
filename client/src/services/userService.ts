@@ -59,3 +59,34 @@ export const getMessages = async (
 
     return res.data;
 };
+
+
+export const sendFileMessage = async ({
+    file,
+    conversationId,
+    senderId,
+}: {
+    file: File;
+    conversationId: string;
+    senderId: string;
+}) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("conversationId", conversationId);
+    formData.append("senderId", senderId);
+
+    const res = await axios.post(
+        `${API_URL}users/send-file`,
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+
+    return res.data;
+};
