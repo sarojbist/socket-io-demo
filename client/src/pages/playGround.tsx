@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllContacts } from "@/services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TUserPlayground } from "@/services/types";
+import ChatWindow from "@/components/chats/chatWindow";
 
 export default function Playground() {
+  const [selectedUser, setSelectedUser] = useState<TUserPlayground | null>(null);
+
   const { data: users, isLoading } = useQuery<TUserPlayground[]>({
     queryKey: ["all-users"],
     queryFn: fetchAllContacts,
@@ -11,46 +15,51 @@ export default function Playground() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* ----------------------------------------
-          LEFT SIDEBAR (Contacts List)
-      ----------------------------------------- */}
-      <aside className="w-[300px] border-r h-screen bg-card p-4 overflow-y-auto">
+      {/* LEFT SIDEBAR */}
+      <aside className="w-[300px] border-r bg-card p-4 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Contacts</h2>
 
         {isLoading ? (
           <SidebarSkeleton />
         ) : (
           <div className="space-y-2">
-            {users?.map((user) => <UserListItem key={user.id} user={user} />)}
+            {users?.map((u) => (
+              <UserListItem
+                key={u.id}
+                user={u}
+                onSelect={() => setSelectedUser(u)} 
+              />
+            ))}
           </div>
         )}
       </aside>
 
-      {/* ----------------------------------------
-          RIGHT PANEL (Chat Area Placeholder)
-      ----------------------------------------- */}
-      <div className="flex-1 flex items-center justify-center text-muted-foreground">
-        Chat Window Coming Soon...
-      </div>
+      {/* RIGHT CHAT WINDOW */}
+      <ChatWindow user={selectedUser} />
     </div>
   );
 }
 
-/* ===============================
-   USER LIST ITEM COMPONENT
-================================*/
-function UserListItem({ user }: { user: TUserPlayground }) {
-  const initial = user.username.charAt(0).toUpperCase();
-
+/* ------------------------------
+   USER LIST ITEM
+------------------------------- */
+function UserListItem({
+  user,
+  onSelect,
+}: {
+  user: TUserPlayground;
+  onSelect: () => void;
+}) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer transition">
-      {/* Avatar */}
+    <div
+      onClick={onSelect}
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
+    >
       <div className="relative">
         <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
-          {initial}
+          {user.username[0].toUpperCase()}
         </div>
 
-        {/* Status Dot */}
         <span
           className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card ${
             user.isOnline ? "bg-green-500" : "bg-gray-400"
@@ -58,7 +67,6 @@ function UserListItem({ user }: { user: TUserPlayground }) {
         />
       </div>
 
-      {/* Username */}
       <div>
         <p className="font-medium">{user.username}</p>
         <p className="text-xs text-muted-foreground">
@@ -69,9 +77,9 @@ function UserListItem({ user }: { user: TUserPlayground }) {
   );
 }
 
-/* ===============================
-   SIDEBAR SKELETON LOADING STATE
-================================*/
+/* ------------------------------
+   SIDEBAR SKELETON
+------------------------------- */
 function SidebarSkeleton() {
   return (
     <div className="space-y-3">
