@@ -8,7 +8,8 @@ import ProtectedRoute from "./auth/protectedRoute";
 import Login from "./auth/login";
 import Playground from "./pages/playGround";
 
-const socket = io("http://localhost:8080");
+// const socket = io("http://localhost:8080");
+const socket = io("https://socket-backend-928159139419.asia-south1.run.app")
 
 function App() {
   return (
