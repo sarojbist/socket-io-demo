@@ -91,3 +91,6 @@ app.post(
 );
 
 
+app.get("/", (req, res) => {
+  res.send("OK");
+});

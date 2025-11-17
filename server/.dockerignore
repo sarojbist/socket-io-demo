@@ -1,0 +1,58 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build output
+dist
+build
+.cache
+.next
+out
+coverage
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker-specific
+Dockerfile*
+docker-compose*.yml
+
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Logs
+logs
+*.log
+log/
+tmp/
+*.pid
+*.seed
+*.pid.lock
+
+# Misc
+*.tgz
+*.zip
+*.tar
+*.gz
+
+# Test files
+__tests__
+test
+tests
+*.spec.js
+*.test.js
