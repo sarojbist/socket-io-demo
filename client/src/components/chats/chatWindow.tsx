@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createConversation, getMessages } from "@/services/userService";
+import { useSocketStore } from "@/store/useSocketStore";
 
 interface ChatWindowProps {
     user: {
@@ -44,6 +45,20 @@ export default function ChatWindow({ user }: ChatWindowProps) {
         enabled: !!conversationId,
     });
 
+    const sendMessage = useSocketStore(s => s.sendMessage);
+    const realtimeMessages = useSocketStore((s) => s.messages);
+
+    function handleMessageSend() {
+        if (conversationId) {
+            sendMessage({
+                conversationId,
+                senderId: me.id,
+                content: input,
+            });
+            setInput("")
+        }
+    }
+
     if (!user) {
         return (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -52,7 +67,16 @@ export default function ChatWindow({ user }: ChatWindowProps) {
         );
     }
 
-    const messages = data?.messages || [];
+    const messagesApi = data?.messages || [];
+
+
+    const messages = [
+        ...messagesApi,
+        ...realtimeMessages.filter(
+            (m) => m.conversationId === conversationId
+        ),
+    ];
+
 
     return (
         <div className="flex flex-col flex-1">
@@ -84,8 +108,8 @@ export default function ChatWindow({ user }: ChatWindowProps) {
                         <div
                             key={msg._id}
                             className={`max-w-[70%] px-4 py-2 rounded-lg shadow text-sm ${msg.senderId === me.id
-                                    ? "ml-auto bg-primary text-white"
-                                    : "mr-auto bg-muted"
+                                ? "ml-auto bg-primary text-white"
+                                : "mr-auto bg-muted"
                                 }`}
                         >
                             {msg.content}
@@ -103,7 +127,7 @@ export default function ChatWindow({ user }: ChatWindowProps) {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                 />
-                <Button>Send</Button>
+                <Button onClick={handleMessageSend}>Send</Button>
             </div>
         </div>
     );

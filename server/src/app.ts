@@ -5,6 +5,7 @@ import { userRouter } from "./Routes/UserRouter";
 import cors from "cors";
 import UserController from "./Controllers/UserController";
 import { UserModel } from "./Models/UserModel";
+import ConversationController from "./Controllers/ConversationController";
 
 export const app = express();
 app.use(cors())
@@ -41,21 +42,32 @@ io.on("connection", (socket) => {
     UserController.makeUserActive({ userId, token }, socket)
   })
 
- socket.on("disconnect", async () => {
-  console.log("Client disconnected:", socket.id);
+  // handle messages
+  socket.on("send-message", ({ conversationId, senderId, content, type = "text" }) => {
+    const payload = { conversationId, senderId, content, type: "text" }
+    ConversationController.handleMessage(
+      payload,
+      socket,
+      io,
+      onlineUsers
+    );
+  })
 
-  const userId = socketToUser.get(socket.id);
+  socket.on("disconnect", async () => {
+    console.log("Client disconnected:", socket.id);
 
-  if (!userId) return;
+    const userId = socketToUser.get(socket.id);
 
-  // Remove from maps
-  onlineUsers.delete(userId);
-  socketToUser.delete(socket.id);
+    if (!userId) return;
 
-  await UserModel.findByIdAndUpdate(userId, { isOnline: false });
+    // Remove from maps
+    onlineUsers.delete(userId);
+    socketToUser.delete(socket.id);
 
-  io.emit("user-offline", userId);
-});
+    await UserModel.findByIdAndUpdate(userId, { isOnline: false });
+
+    io.emit("user-offline", userId);
+  });
 
 });
 

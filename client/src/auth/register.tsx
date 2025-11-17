@@ -64,8 +64,6 @@ export default function Register() {
 
       connectSocket(res.token, res.user.userId);
       navigate('/profile');
-
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Registration failed");

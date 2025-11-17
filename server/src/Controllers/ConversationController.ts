@@ -79,7 +79,7 @@ class ConversationController {
             const skip = (page - 1) * limit;
 
             const messages = await MessageModel.find({ conversationId })
-                .sort({ createdAt: -1 })   
+                .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
                 .lean();
@@ -100,6 +100,66 @@ class ConversationController {
             });
         }
     };
+
+    //conversation handler sockets
+    handleMessage = async ({ conversationId, senderId, content, type = "text" }, socket, io, onlineUsers) => {
+        try {
+            console.log("New Message:", { conversationId, senderId, content });
+
+            // Validate conversation
+            const conversation = await ConversationModel.findById(conversationId);
+            if (!conversation) {
+                return socket.emit("send-message-error", {
+                    success: false,
+                    message: "Conversation not found"
+                });
+            }
+
+            // Save message in DB
+            const message = await MessageModel.create({
+                conversationId,
+                senderId,
+                content,
+                type
+            });
+
+            // Update lastMessageAt
+            conversation.lastMessageAt = new Date();
+            await conversation.save();
+
+            // Emit message to sender immediately
+            socket.emit("new-message", message);
+
+            // Emit to receiver IF ONLINE
+            const receiverId = conversation.participants.find(
+                (id) => id.toString() !== senderId
+            );
+
+            if (!receiverId) {
+                console.log("No receiver found — invalid conversation or sender mismatch");
+                return socket.emit("send-message-error", {
+                    success: false,
+                    message: "Receiver not found for this conversation"
+                });
+            }
+            const receiverSocketId = onlineUsers.get(receiverId.toString());
+
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("new-message", message);
+                console.log("Delivered to receiver:", receiverSocketId);
+            } else {
+                console.log("Receiver offline, skipping socket emit");
+            }
+
+        } catch (error) {
+            console.error("Send message error:", error);
+            socket.emit("send-message-error", {
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
 }
 
 export default new ConversationController();
