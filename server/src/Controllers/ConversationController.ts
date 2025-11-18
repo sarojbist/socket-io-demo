@@ -147,7 +147,7 @@ class ConversationController {
 
             conversation.lastMessageAt = new Date();
             await conversation.save();
-console.log("am i here?")
+            console.log("am i here?")
             if (socket) {
                 socket.emit("new-message", message);
             } else {
@@ -200,19 +200,25 @@ console.log("am i here?")
             }
 
             // Save message in DB
-            const message = await MessageModel.create({
+            const messageDoc = await MessageModel.create({
                 conversationId,
                 senderId,
                 content,
                 type
             });
 
+            const senderUserName = await UserModel.findById(messageDoc.senderId);
+
             // Update lastMessageAt
             conversation.lastMessageAt = new Date();
             await conversation.save();
 
+            const message: any = messageDoc.toObject();
+            message.sender = senderUserName.username;
+
+
             // Emit message to sender immediately
-            socket.emit("new-message", message);
+            // socket.emit("new-message", message);
 
             // Emit to receiver IF ONLINE
             const receiverId = conversation.participants.find(

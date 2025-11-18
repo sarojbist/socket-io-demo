@@ -182,8 +182,8 @@ class UserController {
     try {
       const users = await UserModel
         .find({})
-        .select("-password")
-        .sort({ isOnline: -1, username: 1 });
+        .select("-password -isOnline")
+        .sort({ username: 1 });
       // online first, then alphabetical
 
       return res.status(200).json({

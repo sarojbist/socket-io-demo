@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
-// import { toast } from "sonner";
+import { toast } from "sonner";
 import { devtools } from "zustand/middleware";
+import { useUsersStore } from "./onlineUsersStore";
 
 type MessageType = {
   _id: string;
@@ -10,6 +11,7 @@ type MessageType = {
   content: string;
   type: string;
   createdAt: string;
+  sender: string;
 };
 
 type SendMessagePayload = {
@@ -26,6 +28,8 @@ type SocketStore = {
   connectSocket: (token: string) => void;
   sendMessage: (payload: SendMessagePayload) => void;
   addMessage: (msg: MessageType) => void;
+  clearMessages: () => void;
+
 };
 
 export const useSocketStore = create<SocketStore>()(
@@ -60,9 +64,17 @@ export const useSocketStore = create<SocketStore>()(
 
       // Incoming messages
       socket.on("new-message", (msg: MessageType) => {
-        console.log("Incoming message:", msg);
+        console.log("new", msg)
+        toast.success(`${msg.sender} sent you ${msg.content}`);
         get().addMessage(msg);
       });
+      const setOnlineUsers = useUsersStore.getState().setOnlineUsers;
+
+      socket.on("online-users", (users: string[]) => {
+        setOnlineUsers(users);
+      });
+
+
     },
 
     sendMessage: ({ conversationId, senderId, content }) => {
@@ -81,5 +93,10 @@ export const useSocketStore = create<SocketStore>()(
       set((state) => ({
         messages: [...state.messages, msg],
       })),
+
+    clearMessages: () =>
+      set({
+        messages: [],
+      }),
   }))
 );

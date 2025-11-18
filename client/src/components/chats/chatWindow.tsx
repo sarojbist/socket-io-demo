@@ -26,6 +26,7 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [input, setInput] = useState("");
     const scrollRef = useRef<HTMLDivElement>(null);
+const clearMessages = useSocketStore((s) => s.clearMessages);
 
     useEffect(() => {
         if (!me || !user) return;
@@ -40,6 +41,8 @@ export function ChatWindow({ user, onBack }: ChatWindowProps) {
         };
 
         fetchConversation();
+
+        clearMessages()
     }, [user]);
 
     const { data, isLoading } = useQuery({

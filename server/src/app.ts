@@ -37,6 +37,9 @@ io.on("connection", async (socket) => {
   onlineUsers.set(userId, socket.id);
   socketToUser.set(socket.id, userId);
 
+
+  io.emit("online-users", [...onlineUsers.keys()]);
+
   await UserModel.findByIdAndUpdate(userId, { isOnline: true });
 
   console.log("Client connected:", socket.id);
@@ -79,6 +82,8 @@ io.on("connection", async (socket) => {
     // Remove from maps
     onlineUsers.delete(userId);
     socketToUser.delete(socket.id);
+      io.emit("online-users", [...onlineUsers.keys()]);
+
 
     await UserModel.findByIdAndUpdate(userId, { isOnline: false });
 

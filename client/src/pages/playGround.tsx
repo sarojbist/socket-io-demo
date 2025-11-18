@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllContacts } from "@/services/userService";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TUserPlayground } from "@/services/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatWindow } from "@/components/chats/chatWindow";
+import { useUsersStore } from "@/store/onlineUsersStore";
 
 export default function Playground() {
   const [selectedUser, setSelectedUser] = useState<TUserPlayground | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+
+  const onlineUsers = useUsersStore((s) => s.onlineUsers);
 
   const { data: users, isLoading } = useQuery<TUserPlayground[]>({
     queryKey: ["all-users"],
@@ -24,6 +27,24 @@ export default function Playground() {
   function handleBack() {
     setIsMobileSidebarOpen(true);
   }
+
+  const finalUsers = useMemo(() => {
+  if (!users) return [];
+
+  return users
+    .map((u) => ({
+      ...u,
+      isOnline: onlineUsers.includes(u._id),
+    }))
+    .sort((a, b) => {
+      if (a.isOnline === b.isOnline) {
+        return a.username.localeCompare(b.username);
+      }
+      return a.isOnline ? -1 : 1;
+    });
+}, [users, onlineUsers]);
+
+
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -43,7 +64,7 @@ export default function Playground() {
               <SidebarSkeleton />
             ) : (
               <div className="space-y-1">
-                {users?.map((u) => (
+                {finalUsers?.map((u) => (
                   <UserListItem
                     key={u._id}
                     user={u}
