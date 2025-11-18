@@ -7,10 +7,12 @@ import type { TUserPlayground } from "@/services/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatWindow } from "@/components/chats/chatWindow";
 import { useUsersStore } from "@/store/onlineUsersStore";
+import { useSidebarContext } from "@/context/SidebarContext";
 
 export default function Playground() {
   const [selectedUser, setSelectedUser] = useState<TUserPlayground | null>(null);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+  // const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+  const {isMobileSidebarOpen, toggleSidebar}= useSidebarContext()
 
   const onlineUsers = useUsersStore((s) => s.onlineUsers);
 
@@ -21,11 +23,11 @@ export default function Playground() {
 
   function handleUserSelect(user: any) {
     setSelectedUser(user);
-    setIsMobileSidebarOpen(false);
+    toggleSidebar();
   }
 
   function handleBack() {
-    setIsMobileSidebarOpen(true);
+    toggleSidebar();
   }
 
   const finalUsers = useMemo(() => {
