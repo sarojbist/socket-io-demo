@@ -29,7 +29,6 @@ const io = new Server(httpServer, {
 
 io.use(socketAuth);
 
-
 io.on("connection", async (socket) => {
 
   const userId = (socket as any).user.id;
@@ -45,21 +44,9 @@ io.on("connection", async (socket) => {
   console.log("Client connected:", socket.id);
   io.emit("user-online", userId);
 
-
   socket.on("welcome", (msg) => {
     console.log("welcome msg:", msg)
   })
-
-  // socket.on("make-user-active", ({ userId, token }) => {
-  //   console.log("User just got active ", userId, socket.id);
-  //   onlineUsers.set(userId, socket.id);
-  //   socketToUser.set(socket.id, userId);
-  //   const allOnlineUserIds = [...onlineUsers.values()];
-  //   // const Keys = [...onlineUsers.keys()];
-  //   // console.log("keys", Keys);
-  //   console.log("active sockets/users", allOnlineUserIds);
-  //   UserController.makeUserActive({ userId, token }, socket);
-  // });
 
   // handle messages
   socket.on("send-message", ({ conversationId, senderId, content, type = "text" }) => {
@@ -82,8 +69,7 @@ io.on("connection", async (socket) => {
     // Remove from maps
     onlineUsers.delete(userId);
     socketToUser.delete(socket.id);
-      io.emit("online-users", [...onlineUsers.keys()]);
-
+    io.emit("online-users", [...onlineUsers.keys()]);
 
     await UserModel.findByIdAndUpdate(userId, { isOnline: false });
 

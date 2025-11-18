@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,9 +17,6 @@ import { toast } from "sonner";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useNavigate } from 'react-router-dom';
 
-// ------------------
-// Zod Schema
-// ------------------
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Enter a valid email"),
@@ -30,7 +26,6 @@ const registerSchema = z.object({
 type RegisterFormType = z.infer<typeof registerSchema>;
 
 export default function Register() {
-  const [showPassword] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormType>({
@@ -42,9 +37,6 @@ export default function Register() {
     },
   });
 
-  // -------------------------
-  // React Query Mutation HERE
-  // -------------------------
   const { mutateAsync, isPending } = useMutation({
     mutationFn: registerService,
   });
@@ -62,7 +54,7 @@ export default function Register() {
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
 
-      connectSocket(res.token);
+      connectSocket();
       navigate('/playground');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -70,7 +62,6 @@ export default function Register() {
     }
   };
 
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -120,8 +111,8 @@ export default function Register() {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
+                      type={"password"}
+                      placeholder="your-password"
                       {...field}
                     />
                   </FormControl>

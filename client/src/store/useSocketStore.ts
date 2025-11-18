@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
-import { devtools } from "zustand/middleware";
 import { useUsersStore } from "./onlineUsersStore";
 
 type MessageType = {
@@ -25,7 +24,7 @@ type SocketStore = {
 
   messages: MessageType[];
 
-  connectSocket: (token: string) => void;
+  connectSocket: () => void;
   sendMessage: (payload: SendMessagePayload) => void;
   addMessage: (msg: MessageType) => void;
   clearMessages: () => void;
@@ -35,12 +34,11 @@ const socketUrl = "https://socket-backend-928159139419.asia-south1.run.app";
 // const socketUrl = import.meta.env.VITE_SOCKET;
 
 export const useSocketStore = create<SocketStore>()(
-  devtools((set, get) => ({
+  (set, get) => ({
     socket: null,
     messages: [],
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    connectSocket: (token) => {
+    connectSocket: () => {
       const socket = io(socketUrl, {
         transports: ["websocket"],
         reconnection: true,
@@ -81,7 +79,6 @@ export const useSocketStore = create<SocketStore>()(
         setOnlineUsers(users);
       });
 
-
     },
 
     sendMessage: ({ conversationId, senderId, content }) => {
@@ -105,5 +102,4 @@ export const useSocketStore = create<SocketStore>()(
       set({
         messages: [],
       }),
-  }))
-);
+  }));

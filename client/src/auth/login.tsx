@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,9 +19,6 @@ import { toast } from "sonner";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useNavigate } from "react-router-dom";
 
-// ----------------------
-// ZOD LOGIN SCHEMA
-// ----------------------
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -31,7 +27,6 @@ const loginSchema = z.object({
 type LoginFormType = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const [showPassword] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<LoginFormType>({
@@ -60,7 +55,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       // Connect socket globally
-      connectSocket(res.token);
+      connectSocket();
 
       navigate("/profile");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,8 +98,8 @@ export default function Login() {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
+                      type={"password"}
+                      placeholder="your_password"
                       {...field}
                     />
                   </FormControl>
