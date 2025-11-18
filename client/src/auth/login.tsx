@@ -60,7 +60,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       // Connect socket globally
-      connectSocket(res.token, res.user.id);
+      connectSocket(res.token);
 
       navigate("/profile");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,8 +7,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Copy everything (including .env.staging)
 COPY . .
-RUN npm run build
+
+# Build with STAGING mode
+RUN npm run build -- --mode staging
 
 # ----------------------------------------
 # 2. Production runtime
@@ -16,13 +19,10 @@ RUN npm run build
 FROM node:20 AS runner
 WORKDIR /app
 
-# Install a lightweight static server
 RUN npm install -g serve
 
-# Copy only the build folder
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 8080
 
-# Serve the Vite build
 CMD ["serve", "-s", "dist", "-l", "8080"]

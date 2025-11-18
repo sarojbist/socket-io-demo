@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { devtools } from "zustand/middleware";
 
 type MessageType = {
@@ -23,9 +23,7 @@ type SocketStore = {
 
   messages: MessageType[];
 
-  connectSocket: (token: string, userId: string) => void;
-  // makeUserActive: (token: string, userId: string) => void;
-
+  connectSocket: (token: string) => void;
   sendMessage: (payload: SendMessagePayload) => void;
   addMessage: (msg: MessageType) => void;
 };
@@ -33,19 +31,25 @@ type SocketStore = {
 export const useSocketStore = create<SocketStore>()(
   devtools((set, get) => ({
     socket: null,
-    messages: [], // GLOBAL REALTIME MESSAGES
+    messages: [],
 
-    connectSocket: (token, userId) => {
-      if (get().socket) return;
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    connectSocket: (token) => {
       const socket = io(import.meta.env.VITE_SOCKET || "http://localhost:8080", {
-        auth: { token },
         transports: ["websocket"],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 500,
+
+        auth: (cb) => {
+          cb({
+            token: localStorage.getItem("token"),
+          });
+        },
       });
 
       set({ socket });
 
-      // Listeners
       socket.on("connect", () => {
         console.log("Socket connected:", socket.id);
       });
@@ -54,32 +58,12 @@ export const useSocketStore = create<SocketStore>()(
         console.log("Socket disconnected");
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      socket.on("make-user-active-success", (msg) => {
-        console.log("msg");
-        toast.success("User activated");
-      });
-
-      socket.on("make-user-active-error", (err) => {
-        toast.error(err?.message);
-      });
-
-      // Listen for messages FROM BACKEND
+      // Incoming messages
       socket.on("new-message", (msg: MessageType) => {
         console.log("Incoming message:", msg);
-        toast.success(`Incoming message: ${msg.content}`);
         get().addMessage(msg);
       });
-
-      socket.emit("make-user-active", { userId, token });
     },
-
-    // makeUserActive: (userId, token) => {
-    //   const socket = get().socket;
-    //   if (!socket) return console.warn("Socket not connected yet");
-
-    //   socket.emit("make-user-active", { userId, token });
-    // },
 
     sendMessage: ({ conversationId, senderId, content }) => {
       const socket = get().socket;

@@ -62,7 +62,7 @@ export default function Register() {
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
 
-      connectSocket(res.token, res.user.userId);
+      connectSocket(res.token);
       navigate('/playground');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

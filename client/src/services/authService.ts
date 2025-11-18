@@ -1,8 +1,8 @@
 import axios from "axios";
 import type { TGetMyDetailsResponse } from "./types";
 
-// const API_URL = import.meta.env.VITE_BASE_URL;
-const API_URL = "https://socket-backend-928159139419.asia-south1.run.app/api/v1/"
+const API_URL = import.meta.env.VITE_BASE_URL;
+// const API_URL = "https://socket-backend-928159139419.asia-south1.run.app/api/v1/"
 
 export const registerService = async (data: {
   username: string;

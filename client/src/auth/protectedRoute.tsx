@@ -13,7 +13,7 @@ const ProtectedRoute = () => {
 
     useEffect(() => {
         if (token && user?.id) {
-            connectSocket(token, user.id);
+            connectSocket(token);
         }
     }, []);
 

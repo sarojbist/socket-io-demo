@@ -9,7 +9,9 @@ import Login from "./auth/login";
 import Playground from "./pages/playGround";
 
 // const socket = io("http://localhost:8080");
-const socket = io("https://socket-backend-928159139419.asia-south1.run.app")
+// const socket = io("https://socket-backend-928159139419.asia-south1.run.app")
+const socket = io(import.meta.env.VITE_SOCKET);
+
 
 function App() {
   return (
