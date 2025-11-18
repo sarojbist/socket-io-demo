@@ -88,6 +88,5 @@ export const sendFileMessage = async ({
             },
         }
     );
-
     return res.data;
 };

@@ -7,26 +7,23 @@ import { createConversation, getMessages, sendFileMessage } from "@/services/use
 import { useSocketStore } from "@/store/useSocketStore";
 import { ArrowLeft, Send } from "lucide-react";
 import { toast } from "sonner";
+import type { TUserPlayground } from "@/services/types";
 
 interface ChatWindowProps {
-    user: {
-        _id: string;
-        username: string;
-        isOnline: boolean;
-    } | null;
+    user: TUserPlayground | null;
     onBack: () => void;
 }
 
 export function ChatWindow({ user, onBack }: ChatWindowProps) {
     const [uploading, setUploading] = useState(false);
+    const [conversationId, setConversationId] = useState<string | null>(null);
+    const [input, setInput] = useState("");
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     const raw = localStorage.getItem("user");
     const me = raw ? JSON.parse(raw) : null;
 
-    const [conversationId, setConversationId] = useState<string | null>(null);
-    const [input, setInput] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
-const clearMessages = useSocketStore((s) => s.clearMessages);
+    const clearMessages = useSocketStore((s) => s.clearMessages);
 
     useEffect(() => {
         if (!me || !user) return;
@@ -211,7 +208,6 @@ const clearMessages = useSocketStore((s) => s.clearMessages);
             </div>
 
             <div className="p-3 border-t flex items-center gap-2">
-
                 <input
                     id="file-input"
                     type="file"
@@ -226,7 +222,6 @@ const clearMessages = useSocketStore((s) => s.clearMessages);
                         "📎"
                     )}
                 </label>
-
 
                 <Input
                     placeholder="Type a message..."
@@ -244,10 +239,7 @@ const clearMessages = useSocketStore((s) => s.clearMessages);
                 >
                     <Send className="h-4 w-4" />
                 </Button>
-
             </div>
-
-
         </div>
     );
 }

@@ -104,7 +104,6 @@ class UserController {
       // Generate token
       const token = generateJwt({ id: user._id, username: user.username })
 
-
       return res.status(200).json({
         success: true,
         token,

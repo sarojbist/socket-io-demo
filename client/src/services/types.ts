@@ -11,6 +11,13 @@ export type TGetMyDetailsResponse = {
   user: TUser;
 };
 
+export type TUserPlaygroundApi = {
+  _id: string;
+  username: string;
+  email: string;
+  // isOnline: boolean;
+  createdAt: string;
+}
 export type TUserPlayground = {
   _id: string;
   username: string;
@@ -18,15 +25,13 @@ export type TUserPlayground = {
   isOnline: boolean;
   createdAt: string;
 }
-
 export type IGetAllUsersResponse = {
   success: boolean;
-  users: TUserPlayground[];
+  users: TUserPlaygroundApi[];
 }
 
 
 // chats
-// Conversation model from backend
 export interface TConversation {
   _id: string;
   participants: string[];
