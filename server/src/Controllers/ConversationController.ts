@@ -147,7 +147,7 @@ class ConversationController {
 
             conversation.lastMessageAt = new Date();
             await conversation.save();
-
+console.log("am i here?")
             if (socket) {
                 socket.emit("new-message", message);
             } else {

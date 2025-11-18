@@ -6,7 +6,7 @@ import cors from "cors";
 import UserController from "./Controllers/UserController";
 import { UserModel } from "./Models/UserModel";
 import ConversationController from "./Controllers/ConversationController";
-import { verifyJwt } from "./Utils/jwtAuth";
+import { socketAuth, verifyJwt } from "./Utils/jwtAuth";
 import { upload } from "./Middlewares/multer";
 
 export const app = express();
@@ -27,21 +27,36 @@ const io = new Server(httpServer, {
   }
 });
 
-io.on("connection", (socket) => {
+io.use(socketAuth);
+
+
+io.on("connection", async (socket) => {
+
+  const userId = (socket as any).user.id;
+
+  onlineUsers.set(userId, socket.id);
+  socketToUser.set(socket.id, userId);
+
+  await UserModel.findByIdAndUpdate(userId, { isOnline: true });
+
+  console.log("Client connected:", socket.id);
+  io.emit("user-online", userId);
+
+
   socket.on("welcome", (msg) => {
     console.log("welcome msg:", msg)
   })
 
-  socket.on("make-user-active", ({ userId, token }) => {
-    console.log("User just got active ", userId, socket.id);
-    onlineUsers.set(userId, socket.id);
-    socketToUser.set(socket.id, userId);
-    const allOnlineUserIds = [...onlineUsers.values()];
-    // const Keys = [...onlineUsers.keys()];
-    // console.log("keys", Keys);
-    console.log("active sockets/users", allOnlineUserIds);
-    UserController.makeUserActive({ userId, token }, socket);
-  });
+  // socket.on("make-user-active", ({ userId, token }) => {
+  //   console.log("User just got active ", userId, socket.id);
+  //   onlineUsers.set(userId, socket.id);
+  //   socketToUser.set(socket.id, userId);
+  //   const allOnlineUserIds = [...onlineUsers.values()];
+  //   // const Keys = [...onlineUsers.keys()];
+  //   // console.log("keys", Keys);
+  //   console.log("active sockets/users", allOnlineUserIds);
+  //   UserController.makeUserActive({ userId, token }, socket);
+  // });
 
   // handle messages
   socket.on("send-message", ({ conversationId, senderId, content, type = "text" }) => {
@@ -73,10 +88,11 @@ io.on("connection", (socket) => {
 });
 
 app.use("/api/v1/users", userRouter);
+
 app.post(
   "/api/v1/users/send-file",
   verifyJwt,
-  upload.single("file"),  
+  upload.single("file"),
   (req: any, res, next) => {
     const userId = req.user.id.toString();
     const socketId = onlineUsers.get(userId);

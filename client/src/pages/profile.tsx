@@ -1,25 +1,23 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useSocketStore } from "@/store/useSocketStore";
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getMyDetails } from "@/services/authService";
 
 export default function Profile() {
 
-    const rawUser = localStorage.getItem("user");
-    const userInfo = rawUser ? JSON.parse(rawUser) : null;
+    // const rawUser = localStorage.getItem("user");
+    // const userInfo = rawUser ? JSON.parse(rawUser) : null;
 
     const token = localStorage.getItem("token") || "";
-    const makeUserActive = useSocketStore((s) => s.makeUserActive);
+    // const makeUserActive = useSocketStore((s) => s.makeUserActive);
 
-    useEffect(() => {
-        // console.log("token", token)
-        if (userInfo?.id && token) {
-            makeUserActive(userInfo.id, token);
-        }
-    }, []);
+    // useEffect(() => {
+    //     // console.log("token", token)
+    //     if (userInfo?.id && token) {
+    //         makeUserActive(userInfo.id, token);
+    //     }
+    // }, []);
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["my-details"],

@@ -63,7 +63,7 @@ export default function Register() {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       connectSocket(res.token, res.user.userId);
-      navigate('/profile');
+      navigate('/playground');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Registration failed");

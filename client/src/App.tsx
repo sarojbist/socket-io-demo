@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Register from "./auth/register";
 import { useEffect } from "react";
@@ -15,14 +15,18 @@ function App() {
   return (
     <div className="min-h-svh">
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
+
+
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/playground" element={<Playground />} />
         </Route>
       </Routes>
+
     </div>
   );
 }

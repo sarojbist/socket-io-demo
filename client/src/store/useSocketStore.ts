@@ -24,7 +24,7 @@ type SocketStore = {
   messages: MessageType[];
 
   connectSocket: (token: string, userId: string) => void;
-  makeUserActive: (token: string, userId: string) => void;
+  // makeUserActive: (token: string, userId: string) => void;
 
   sendMessage: (payload: SendMessagePayload) => void;
   addMessage: (msg: MessageType) => void;
@@ -74,12 +74,12 @@ export const useSocketStore = create<SocketStore>()(
       socket.emit("make-user-active", { userId, token });
     },
 
-    makeUserActive: (userId, token) => {
-      const socket = get().socket;
-      if (!socket) return console.warn("Socket not connected yet");
+    // makeUserActive: (userId, token) => {
+    //   const socket = get().socket;
+    //   if (!socket) return console.warn("Socket not connected yet");
 
-      socket.emit("make-user-active", { userId, token });
-    },
+    //   socket.emit("make-user-active", { userId, token });
+    // },
 
     sendMessage: ({ conversationId, senderId, content }) => {
       const socket = get().socket;

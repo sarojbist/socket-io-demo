@@ -37,3 +37,19 @@ export function verifyJwt(req, res, next) {
         });
     }
 }
+
+export function socketAuth(socket, next) {
+  try {
+    const token = socket.handshake.auth?.token;
+    if (!token) {
+      return next(new Error("Provide Auth Token"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    socket.user = decoded; // attach like express req.user
+    next();
+  } catch (err) {
+    next(new Error("Invalid Token"));
+  }
+}
