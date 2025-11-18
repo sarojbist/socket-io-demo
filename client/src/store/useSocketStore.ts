@@ -31,6 +31,8 @@ type SocketStore = {
   clearMessages: () => void;
 
 };
+const socketUrl = "https://socket-backend-928159139419.asia-south1.run.app";
+// const socketUrl = import.meta.env.VITE_SOCKET;
 
 export const useSocketStore = create<SocketStore>()(
   devtools((set, get) => ({
@@ -39,7 +41,7 @@ export const useSocketStore = create<SocketStore>()(
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     connectSocket: (token) => {
-      const socket = io(import.meta.env.VITE_SOCKET || "http://localhost:8080", {
+      const socket = io(socketUrl, {
         transports: ["websocket"],
         reconnection: true,
         reconnectionAttempts: Infinity,
@@ -65,7 +67,12 @@ export const useSocketStore = create<SocketStore>()(
       // Incoming messages
       socket.on("new-message", (msg: MessageType) => {
         console.log("new", msg)
-        toast.success(`${msg.sender} sent you ${msg.content}`);
+
+        const me = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (msg.senderId !== me.id) {
+          toast.success(`${msg.sender} sent you ${msg.content}`);
+        }
         get().addMessage(msg);
       });
       const setOnlineUsers = useUsersStore.getState().setOnlineUsers;

@@ -7,14 +7,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy everything (including .env.staging)
+# Copy everything (including .env.production)
 COPY . .
 
-# Build with STAGING mode
-RUN npm run build -- --mode staging
+# Build in production mode
+RUN npm run build -- --mode production
 
 # ----------------------------------------
-# 2. Production runtime
+# 2. Runtime (serving static files)
 # ----------------------------------------
 FROM node:20 AS runner
 WORKDIR /app
@@ -24,5 +24,4 @@ RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 8080
-
 CMD ["serve", "-s", "dist", "-l", "8080"]

@@ -1,14 +1,14 @@
 import axios from "axios";
 import type { CreateConversationResponse, GetMessagesResponse, TUserPlayground } from "./types";
 
-const API_URL = import.meta.env.VITE_BASE_URL;
-// const API_URL = "https://socket-backend-928159139419.asia-south1.run.app/api/v1/"
+// const API_URL = import.meta.env.VITE_BASE_URL;
+const API_URL = "https://socket-backend-928159139419.asia-south1.run.app/api/v1"
 
 export const fetchAllContacts = async (): Promise<TUserPlayground[]> => {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-        `${API_URL}users/get-all-contacts`,
+        `${API_URL}/users/get-all-contacts`,
         {},
         {
             headers: {
@@ -30,7 +30,7 @@ export const createConversation = async ({
     const token = localStorage.getItem("token");
 
     const res = await axios.post<CreateConversationResponse>(
-        `${API_URL}users/create-conversation`,
+        `${API_URL}/users/create-conversation`,
         { userId1, userId2 },
         { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -52,7 +52,7 @@ export const getMessages = async (
     const token = localStorage.getItem("token");
 
     const res = await axios.get<GetMessagesResponse>(
-        `${API_URL}users/get-messages/${conversationId}?page=${page}&limit=${limit}`,
+        `${API_URL}/users/get-messages/${conversationId}?page=${page}&limit=${limit}`,
         {
             headers: { Authorization: `Bearer ${token}` },
         }
@@ -79,7 +79,7 @@ export const sendFileMessage = async ({
     formData.append("senderId", senderId);
 
     const res = await axios.post(
-        `${API_URL}users/send-file`,
+        `${API_URL}/users/send-file`,
         formData,
         {
             headers: {

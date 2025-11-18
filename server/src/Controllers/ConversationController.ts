@@ -218,7 +218,7 @@ class ConversationController {
 
 
             // Emit message to sender immediately
-            // socket.emit("new-message", message);
+            socket.emit("new-message", message);
 
             // Emit to receiver IF ONLINE
             const receiverId = conversation.participants.find(
